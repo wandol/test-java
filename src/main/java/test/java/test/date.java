@@ -12,8 +12,6 @@ public class date {
 		
 		Date time = new Date();
 		
-		System.out.println(time.);
-		
         System.out.println("test");
 		
 	}
