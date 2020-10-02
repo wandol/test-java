@@ -14,7 +14,7 @@ public class date {
 		
 		System.out.println(time.);
 		
-        
+        System.out.println("test");
 		
 	}
 }
