@@ -12,7 +12,7 @@ public class date {
 		
 		Date time = new Date();
 		
-        System.out.println("test");
+        System.out.println("testaa");
 		
 	}
 }
