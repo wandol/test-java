@@ -4696,7 +4696,7 @@ public class ParseHtml {
 		System.out.println("url :: " + doc2.getElementsByAttributeValue("property", "og:url").attr("content"));
 		System.out.println("제목 :: " + doc2.getElementsByAttributeValue("property", "og:title").attr("content"));
 		System.out.println("내용 :: " + doc2.getElementsByClass("article_txt").text());
-		
+		 
 		Document doc3  = Jsoup.parse(html3);
 		System.out.println("작성자 :: " + doc3.getElementsByAttributeValue("property", "taboola:author").attr("content"));
 		System.out.println("작성일 :: " + ZonedDateTime.parse(doc3.getElementsByAttributeValue("property", "article:published_time").attr("content")).format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
