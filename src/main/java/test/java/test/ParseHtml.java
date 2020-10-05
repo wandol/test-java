@@ -4705,5 +4705,6 @@ public class ParseHtml {
 		System.out.println("제목 :: " + doc3.getElementsByAttributeValue("property", "og:title").attr("content"));
 		System.out.println("내용 :: " + doc3.getElementsByClass("content_text").text());
 		System.out.println("이미지 caption :: " + doc3.getElementsByClass("caption").stream().map(v -> v.text()).collect(Collectors.joining("|")));
+		
 	}
 }
