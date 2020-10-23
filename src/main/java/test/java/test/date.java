@@ -1,7 +1,7 @@
 package test.java.test;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class date {
@@ -19,14 +19,33 @@ public class date {
 		
 		//Tue Jan 01 1957 00:00:00 GMT+0830 (대한민국 표준시)
 		
+		//	2020-10-21
+		//Date time = new Date();
 		
-		Date time = new Date();
+		//LocalDate today = LocalDate.now();
+		//String date = today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 		
-		System.out.println("testasdasd");
+		//System.out.println(date);
 		
-		LocalDate today = LocalDate.now();
-		String date = today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+		String test = "2020-10-21";
 		
-		System.out.println(date);
+		System.out.println(dateFormat(test));
+	}
+	
+	public static String dateFormat(String input_date){
+		String result = "";
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat fm = new SimpleDateFormat("yyyyMMddHHmmss");
+
+		try {
+			Date date = format.parse(input_date);
+			String to = fm.format(date);
+			result = to;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		return result;
 	}
 }

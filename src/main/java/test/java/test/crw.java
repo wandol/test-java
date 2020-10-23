@@ -82,6 +82,7 @@ public class crw {
         		log.info(v.get("link") + i);
         		
         		driver.get(v.get("link") + i);
+        		
         		List<WebElement> elements = driver.findElements(By.xpath(v.get("titleXpath")));
         		List<WebElement> titleText = driver.findElements(By.xpath(v.get("titleText")));
         		

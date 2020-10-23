@@ -1,21 +1,17 @@
 package test.java.test;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -23,53 +19,42 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class RestApi {
-
-	private static final String eduUrl = "http://gncare.go.kr/edu_path.php";
-	private static final String notiTUrl = "http://gncare.go.kr/noti_T_path.php";
-	private static final String notiPUrl = "http://gncare.go.kr/noti_P_path.php";
 	
 	public static void main(String[] args) throws IOException, ParseException {
 		
-		String eduFilePath = "/Users/wandol/Downloads/temp/edu";
-		String eduName = "bbs_edu";
-		String notiTFilePath = "/Users/wandol/Downloads/temp/notiT";
-		String notiPFilePath = "/Users/wandol/Downloads/temp/notiP";
+		String eduUrl = "http://gncare.go.kr/edu_path.php";
+		String notiTUrl = "http://gncare.go.kr/noti_T_path.php";
+		String notiPUrl = "http://gncare.go.kr/noti_P_path.php";
+		String target_dir = "/Users/wandol/Downloads/temp";
+		getData("bbs_edu",eduUrl,target_dir);
+		getData("bbs_notiT",notiTUrl,target_dir);
+		getData("bbs_notiP",notiPUrl,target_dir);
 		
-		getData("bbs_notiT",notiTFilePath);
 		
 	}
 	
-	// 넘어온 job 별로 target_url 생성.
-	public static String urlCheck(String jobNm) {
-		String resultUrl = "";
-		if("bbs_edu".equalsIgnoreCase(jobNm)) {
-			resultUrl = eduUrl;
-		}else if("bbs_notiT".equalsIgnoreCase(jobNm)) {
-			resultUrl = notiTUrl;
-		}else {
-			resultUrl = notiPUrl;
-		}
-		return resultUrl;
-	}
-	
-	
-	public static void getData(String jobName, String target_dir) throws IOException, ParseException {
+	public static void getData(String jobName, String target_url,String target_dir) throws IOException, ParseException {
 		
-		String target_url = urlCheck(jobName);
 		URL url = new URL(target_url);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		
-		String result;
-        try (InputStream in = conn.getInputStream();
-                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            
-            byte[] buf = new byte[1024 * 8];
-            int length = 0;
-            while ((length = in.read(buf)) != -1) {
-                out.write(buf, 0, length);
-            }
-            result=new String(out.toByteArray(), "UTF-8");            
+		String result = "";
+		BufferedReader in = null;
+        try {
+        	in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String inputLine;
+			StringBuffer sb = new StringBuffer();
+
+			while ((inputLine = in.readLine()) != null) {
+				sb.append(inputLine);
+			}
+			result = sb.toString();
+			in.close();         
+        }catch(Exception e) {
+        	e.printStackTrace();
+        }finally {
+        	in.close();
         }
         
         JSONParser parser = new JSONParser();
@@ -93,60 +78,101 @@ public class RestApi {
 			file.mkdirs();
 	    }
 		try {
-            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file + "json.fgf" )));
+            PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file + "/" + jobNm + ".fgf" )));
             if("bbs_edu".equalsIgnoreCase(jobNm)) {
             	for (int i = 0; i < list.size(); i++) {
-    				pw.println("<__SBD_MENU_KEY__>" + list.get(i).get(""));
-    				pw.println("<__SBD_MENU_NAME__>" + list.get(i).get(""));
-    				pw.println("<__SBD_CODE_KEY__>" + list.get(i).get(""));
-    				pw.println("<__SBD_CODE_NAME__>" + list.get(i).get(""));
-    				pw.println("<__SBD_BBS_NAME__>" + list.get(i).get(""));
-    				pw.println("<__SBD_PROPTY_KEY__>" + list.get(i).get(""));
-    				pw.println("<__SBD_BBS_KEY__>" + list.get(i).get(""));
+            		StringBuffer fileNameSb = new StringBuffer();
+            		StringBuffer fileExtSb = new StringBuffer();
+            		if(list.get(i).get("e_file1") != null) {
+            			fileNameSb.append(list.get(i).get("e_file1"));
+            			fileExtSb.append(list.get(i).get("e_file1").toString().substring(list.get(i).get("e_file1").toString().lastIndexOf(".")+1));
+            			if(list.get(i).get("e_file2") != null) {
+            				fileNameSb.append("#$##$#" + list.get(i).get("e_file2"));
+            				fileExtSb.append("|" + list.get(i).get("e_file2").toString().substring(list.get(i).get("e_file2").toString().indexOf(".")+1));
+            			}
+            		}
+            		StringBuffer filePathSb = new StringBuffer();
+            		if(list.get(i).get("e_file1_path") != null) {
+            			filePathSb.append(list.get(i).get("e_file1_path"));
+            			if(list.get(i).get("e_file2_path") != null) {
+            				filePathSb.append("#$##$#" + list.get(i).get("e_file2_path"));
+            			}
+            		}
+    				pw.println("<__SBD_MENU_KEY__>" + "");
+    				pw.println("<__SBD_MENU_NAME__>" + "");
+    				pw.println("<__SBD_CODE_KEY__>" + "");
+    				pw.println("<__SBD_CODE_NAME__>" + "");
+    				pw.println("<__SBD_BBS_NAME__>" + "");
+    				pw.println("<__SBD_PROPTY_KEY__>" + "");
+    				pw.println("<__SBD_BBS_KEY__>" + "");
     				pw.println("<__SBD_MAIN_TITLE__>" + list.get(i).get("title"));
     				pw.println("<__SBD_MAIN_CONT__>" + removeTags(list.get(i).get("content").toString()));
-    				pw.println("<__SBD_DEPT_NAME__>" + list.get(i).get(""));
-    				pw.println("<__SBD_DEPT_UPRID__>" + list.get(i).get(""));
-    				pw.println("<__SBD_DEPT_UPRNAME__>" + list.get(i).get(""));
+    				pw.println("<__SBD_DEPT_NAME__>" + "");
+    				pw.println("<__SBD_DEPT_UPRID__>" + "");
+    				pw.println("<__SBD_DEPT_UPRNAME__>" + "");
     				pw.println("<__SBD_REGI_DATE__>" + list.get(i).get("edu_sdate"));
-    				pw.println("<__OSBD_REGI_DATE__>" + list.get(i).get(""));
-    				pw.println("<__SBD_ARCHV_DATE__>" + list.get(i).get(""));
-    				pw.println("<__OSBD_ARCHV_DATE__>" + list.get(i).get(""));
-    				pw.println("<__SBD_ATTACH_NAME__>" + list.get(i).get("e_file1") + "#$##$#" + list.get(i).get("e_file2"));
-    				pw.println("<__SBD_ATTACH_LINK__>" + list.get(i).get("e_file1_path") + "#$##$#" + list.get(i).get("e_file2_path"));
-    				pw.println("<__SBD_LIST_LINK__>" + list.get(i).get(""));
+    				pw.println("<__OSBD_REGI_DATE__>" + "");
+    				pw.println("<__SBD_ARCHV_DATE__>" + "");
+    				pw.println("<__OSBD_ARCHV_DATE__>" + "");
+    				pw.println("<__SBD_ATTACH_NAME__>" + fileNameSb);
+    				pw.println("<__SBD_ATTACH_LINK__>" + filePathSb);
+    				pw.println("<__SBD_LIST_LINK__>" + list.get(i).get("list_path"));
     				pw.println("<__SBD_VIEW_LINK__>" + list.get(i).get("view_path"));
-    				pw.println("<__SBD_PREVIEW_IMAGE__>" + list.get(i).get(""));
-    				pw.println("<__SBD_MENU_PATH__>" + list.get(i).get(""));
-    				pw.println("<__SBD_OPTN_VALUE__>" + list.get(i).get(""));
-    				pw.println("<__SBD_MIME_TYPE__>" + list.get(i).get(""));
+    				pw.println("<__SBD_PREVIEW_IMAGE__>" + "");
+    				pw.println("<__SBD_MENU_PATH__>" + "");
+    				pw.println("<__SBD_OPTN_VALUE__>" + "");
+    				pw.println("<__SBD_MIME_TYPE__>" + fileExtSb);
     			}
             }else {
             	for (int i = 0; i < list.size(); i++) {
-            		pw.println("<__SBD_MENU_KEY__>" + list.get(i).get(""));	
-    				pw.println("<__SBD_MENU_NAME__>" + list.get(i).get(""));
-    				pw.println("<__SBD_CODE_KEY__>" + list.get(i).get(""));
-    				pw.println("<__SBD_CODE_NAME__>" + list.get(i).get(""));
-    				pw.println("<__SBD_BBS_NAME__>" + list.get(i).get(""));
-    				pw.println("<__SBD_PROPTY_KEY__>" + list.get(i).get(""));
-    				pw.println("<__SBD_BBS_KEY__>" + list.get(i).get(""));
+            		StringBuffer fileNameSb = new StringBuffer();
+            		StringBuffer fileExtSb = new StringBuffer();
+            		if(list.get(i).get("board_file1") != null) {
+            			fileNameSb.append(list.get(i).get("board_file1"));
+            			fileExtSb.append(list.get(i).get("board_file1").toString().substring(list.get(i).get("board_file1").toString().lastIndexOf(".")+1));
+            			if(list.get(i).get("board_file2") != null) {
+            				fileNameSb.append("#$##$#" + list.get(i).get("board_file2"));
+            				fileExtSb.append("|" + list.get(i).get("board_file2").toString().substring(list.get(i).get("board_file2").toString().indexOf(".")+1));
+		            		if(list.get(i).get("board_file3") != null) {
+		            			fileNameSb.append("#$##$#" + list.get(i).get("board_file3"));
+		            			fileExtSb.append("|" + list.get(i).get("board_file3").toString().substring(list.get(i).get("board_file3").toString().indexOf(".")+1));
+		            		}
+            			}
+            		}
+            		StringBuffer filePathSb = new StringBuffer();
+            		if(list.get(i).get("board_file1_path") != null) {
+            			filePathSb.append(list.get(i).get("board_file1_path"));
+            			if(list.get(i).get("board_file2_path") != null) {
+            				filePathSb.append("#$##$#" + list.get(i).get("board_file2_path"));
+		            		if(list.get(i).get("board_file3_path") != null) {
+		            			filePathSb.append("#$##$#" + list.get(i).get("board_file3_path"));
+		            		}
+            			}
+            		}
+            		pw.println("<__SBD_MENU_KEY__>" + "");	
+    				pw.println("<__SBD_MENU_NAME__>" + "");
+    				pw.println("<__SBD_CODE_KEY__>" + "");
+    				pw.println("<__SBD_CODE_NAME__>" + "");
+    				pw.println("<__SBD_BBS_NAME__>" + "");
+    				pw.println("<__SBD_PROPTY_KEY__>" + "");
+    				pw.println("<__SBD_BBS_KEY__>" + "");
     				pw.println("<__SBD_MAIN_TITLE__>" + list.get(i).get("board_subject"));
-    				pw.println("<__SBD_MAIN_CONT__>" + list.get(i).get("board_content"));
-    				pw.println("<__SBD_DEPT_NAME__>" + list.get(i).get(""));
-    				pw.println("<__SBD_DEPT_UPRID__>" + list.get(i).get(""));
-    				pw.println("<__SBD_DEPT_UPRNAME__>" + list.get(i).get(""));
+    				pw.println("<__SBD_MAIN_CONT__>" + removeTags(list.get(i).get("board_content").toString()));
+    				pw.println("<__SBD_DEPT_NAME__>" + "");
+    				pw.println("<__SBD_DEPT_UPRID__>" + "");
+    				pw.println("<__SBD_DEPT_UPRNAME__>" + "");
     				pw.println("<__SBD_REGI_DATE__>" + list.get(i).get("board_regdate"));
-    				pw.println("<__OSBD_REGI_DATE__>" + list.get(i).get(""));
-    				pw.println("<__SBD_ARCHV_DATE__>" + list.get(i).get(""));
-    				pw.println("<__OSBD_ARCHV_DATE__>" + list.get(i).get(""));
-    				pw.println("<__SBD_ATTACH_NAME__>" + list.get(i).get("board_file1") + "#$##$#" + list.get(i).get("board_file2") + "#$##$#" + list.get(i).get("board_file3"));
-    				pw.println("<__SBD_ATTACH_LINK__>" + list.get(i).get("board_file1_path") + "#$##$#" + list.get(i).get("board_file2_path") + "#$##$#" + list.get(i).get("board_file3_path"));
-    				pw.println("<__SBD_LIST_LINK__>" + list.get(i).get(""));
-    				pw.println("<__SBD_VIEW_LINK__>" + list.get(i).get(""));
-    				pw.println("<__SBD_PREVIEW_IMAGE__>" + list.get(i).get(""));
-    				pw.println("<__SBD_MENU_PATH__>" + list.get(i).get(""));
-    				pw.println("<__SBD_OPTN_VALUE__>" + list.get(i).get(""));
-    				pw.println("<__SBD_MIME_TYPE__>" + list.get(i).get(""));
+    				pw.println("<__OSBD_REGI_DATE__>" + "");
+    				pw.println("<__SBD_ARCHV_DATE__>" + "");
+    				pw.println("<__OSBD_ARCHV_DATE__>" + "");
+    				pw.println("<__SBD_ATTACH_NAME__>" + fileNameSb.toString());
+    				pw.println("<__SBD_ATTACH_LINK__>" + filePathSb.toString());
+    				pw.println("<__SBD_LIST_LINK__>" + list.get(i).get("list_path"));
+    				pw.println("<__SBD_VIEW_LINK__>" + list.get(i).get("view_path"));
+    				pw.println("<__SBD_PREVIEW_IMAGE__>" + "");
+    				pw.println("<__SBD_MENU_PATH__>" + "");
+    				pw.println("<__SBD_OPTN_VALUE__>" + "");
+    				pw.println("<__SBD_MIME_TYPE__>" + fileExtSb.toString());
     			}
             }
 
