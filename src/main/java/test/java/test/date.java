@@ -1,7 +1,11 @@
 package test.java.test;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class date {
@@ -14,7 +18,7 @@ public class date {
 	* @Discript
 	* @return 	void
 	*/
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParseException {
 		
 		
 		//Tue Jan 01 1957 00:00:00 GMT+0830 (대한민국 표준시)
@@ -26,10 +30,15 @@ public class date {
 		//String date = today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 		
 		//System.out.println(date);
-		
+		String DATE_FORMATTER= "yyyy-MM-dd HH:mm:ss";
+
 		String test = "2020-10-21";
-		
-		System.out.println(dateFormat(test));
+		String data = "2020.10.27. PM 4:49";
+
+		DateFormat dateParser = new SimpleDateFormat("yyyy.MM.dd. a KK:mm");
+		System.out.println(LocalDateTime.ofInstant(dateParser.parse(data).toInstant(), ZoneId.systemDefault()));
+
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER);
 	}
 	
 	public static String dateFormat(String input_date){
