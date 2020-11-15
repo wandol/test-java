@@ -1,7 +1,6 @@
 package test.java.test;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,11 +42,7 @@ public class crw2 {
 		//*[@id="section_body"]/ul[1]/li[1]/dl/dt[1]/a
 		//naverPolList(naverPolListUrl);
 		
-		//naverHomePoliticGetDetail(naverPolList(naverPolListUrl));
-
-		//getDetailData(contentsUrl);
-
-		naverPolList(naverPolListUrl);
+		naverHomePoliticGetDetail(naverPolList(naverPolListUrl));
 	}
 	
 	public static List<String> naverPolList(String url) throws IOException {
@@ -60,20 +55,11 @@ public class crw2 {
 		
 //		List<WebElement> headLineOpinionLink = driver.findElements(By.xpath("//*[@id='main_content']/div[2]/ul/li/dl/dt[1]/a"));
 		List<WebElement> headLineImgLink = driver.findElements(By.xpath("//*[@id='section_body']/ul/li/dl/dt[2]/a"));
-		List<WebElement> headLinetime = driver.findElements(By.xpath("//*[@id='section_body']/ul/li/dl/dd/span[3]"));
 		for (WebElement v : headLineImgLink) {
 			result.add(v.getAttribute("href"));
-		}
-		log.info(headLineImgLink.size() + "");
-		log.info(headLinetime.size() + "");
-		for (int i = 0; i < headLinetime.size(); i++) {
-			log.info(headLinetime.get(i).getText());
-			if("1시간전".equals(headLinetime.get(i).getText().trim())){
-				log.info("@@@@@@@@@");
-			}
-		}
+		}		
 		driver.close();
-
+		
 		return result;
 	}
 	public static void naverHomePoliticGetDetail(List<String> urls){
@@ -98,11 +84,10 @@ public class crw2 {
 		Document doc  = Jsoup.connect(url).get();
 		
 		Contents cont =  new  Contents();
-		cont.setTitle(doc.getElementsByAttributeValue("property","og:title").text());
+		cont.setTitle(doc.getElementsByAttributeValue("property", "og:title" ).attr("content"));
 		cont.setContents(doc.getElementsByClass("_article_body_contents").text());
 		cont.setImgCaptionList(doc.getElementsByClass("img_desc").stream().map(v -> v.text()).collect(Collectors.joining("|")));
 		cont.setWriter(doc.getElementsByAttributeValue("property", "me2:post_tag").attr("content"));
-		cont.setWriteDt(LocalDateTime.parse("2020.10.26. 오전 9:35"));
 	
 		log.info(cont.toString());
 	}

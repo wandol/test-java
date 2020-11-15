@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class date {
@@ -30,15 +29,15 @@ public class date {
 		//String date = today.minusDays(1).format(DateTimeFormatter.ofPattern("yyyyMMdd"));
 		
 		//System.out.println(date);
-		String DATE_FORMATTER= "yyyy-MM-dd HH:mm:ss";
+		
+//		String test = "2020-10-21";
+//
+//		System.out.println(dateFormat(test));
 
-		String test = "2020-10-21";
-		String data = "2020.10.27. PM 4:49";
+		String date = "2020.11.08. PM 6:44";
+		SimpleDateFormat dateParser = new SimpleDateFormat("yyyy.MM.dd. a KK:mm");
 
-		DateFormat dateParser = new SimpleDateFormat("yyyy.MM.dd. a KK:mm");
-		System.out.println(LocalDateTime.ofInstant(dateParser.parse(data).toInstant(), ZoneId.systemDefault()));
-
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMATTER);
+		System.out.println(dateParser.parse(date));
 	}
 	
 	public static String dateFormat(String input_date){
