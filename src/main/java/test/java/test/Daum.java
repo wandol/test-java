@@ -1,6 +1,8 @@
 package test.java.test;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.openqa.selenium.By;
 import org.openqa.selenium.ElementNotInteractableException;
 import org.openqa.selenium.WebDriver;
@@ -10,8 +12,16 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * User: wandol<br/>
@@ -28,7 +38,7 @@ public class Daum {
 
         String daumHomeUrl = "https://www.daum.net/?nil_profile=mini&nil_src=daum";
 
-        String daumPolHomeUrl = "https://news.daum.net/breakingnews/politics?regDate=20201113&page=1";
+        String daumPolHomeUrl = "https://news.daum.net/breakingnews/politics?page=1";
 
         String daumSocHomeUrl = "https://news.daum.net/breakingnews/society?regDate=20201113&page=1";
 
@@ -134,5 +144,63 @@ public class Daum {
         } finally {
             driver.quit();
         }
+    }
+    public static void getDetailArticle(List<String> list) throws IOException {
+
+        List<Contents2> result = new ArrayList<>();
+        List<String> pks = new ArrayList<>();
+        Document doc;
+
+
+        for (String url : list) {
+
+            doc = Jsoup.connect(url).get();
+
+            DateFormat dateParser = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
+
+            String writeDtTag = doc.getElementsByAttributeValue("property","og:regDate").attr("content");
+            LocalDateTime regDt ;
+
+            try {
+                regDt = LocalDateTime.ofInstant(dateParser.parse(writeDtTag).toInstant(), ZoneId.of("Asia/Seoul"));
+            } catch (ParseException e) {
+                e.printStackTrace();
+                regDt = LocalDateTime.now();
+            }
+
+            //  중복된 contents는 담지 않음.
+            Contents2 cont = Contents2.builder()
+                    .articleCategory(doc.select("#kakaoBody").text())
+                    .articleContents(doc.getElementsByClass("article_view").text())
+                    .articleImgCaption(doc.getElementsByClass("txt_caption").stream().map(v -> v.text()).collect(Collectors.joining("|")))
+                    .articleMediaNm(doc.select("#cSub > div > em > a > img").attr("alt"))
+                    // 해당 제목과 url의 텍스트를 합쳐서 md5를 구하고 pk로 함.
+                    .articlePk("")
+                    .articleTitle(doc.getElementsByAttributeValue("property","og:title").attr("content"))
+                    .articleUrl(url)
+                    .articleWriteDt(regDt)
+                    .articleWriter(doc.select("#cSub > div > span > span:nth-child(1)").text())
+                    .siteNm("DAUM")
+                    .srcType("HOMEHEADLINE")
+                    .delYn("N")
+                    .articlePostStartDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                    .articleCrwDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                    .upDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                    .build();
+
+            result.add(cont);
+        }
+
+        //  PK list
+        result.forEach(v -> log.info(" get detail :: {}" ,v.toString()));
+
+//                Contents2 cont =  new  Contents();
+//                cont.setTitle(doc.getElementsByAttributeValue("property","og:title").attr("content"));
+//                cont.setContents(doc.getElementsByClass("article_view").text());
+//                cont.setImgCaptionList(doc.getElementsByClass("txt_caption").stream().map(v -> v.text()).collect(Collectors.joining("|")));
+//                cont.setWriter(doc.getElementsByAttributeValue("property", "me2:post_tag").attr("content"));
+//
+//                result.add(cont);
+
     }
 }
