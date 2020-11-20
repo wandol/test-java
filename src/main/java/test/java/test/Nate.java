@@ -58,10 +58,10 @@ public class Nate {
         options.setHeadless(true);
         // 크롬 브라우져 열기.
         WebDriver driver = new ChromeDriver(options);
-        driver.manage().window().maximize();
         driver.navigate().to(url);
-        WebDriverWait wait;
         try {
+            WebElement  prev = driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[2]"));
+            log.info("prev :: {}",prev.getAttribute("title"));
 
             WebElement tabCnt = driver.findElement(By.xpath("//*[@id='newsMoreArea']/em"));
             log.info("tabCnt :: {}", tabCnt.getText());
