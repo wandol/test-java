@@ -3,7 +3,10 @@ package test.java.test;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -20,6 +23,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -33,25 +37,26 @@ public class Nate {
 
     private static final String chromeDriverPath = "/Users/wandol/Documents/development/chromedriver";
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, IOException {
 
         String nateHomeUrl = "https://www.nate.com/?f=autorefresh";
 
-        String daumPolHomeUrl = "https://news.daum.net/breakingnews/politics?page=1";
+        String natePolHomeUrl = "https://news.nate.com/recent?cate=pol&mid=n0201&type=c&date=20201120&page=1";
 
-        String daumSocHomeUrl = "https://news.daum.net/breakingnews/society?regDate=20201113&page=1";
+        String nateSocHomeUrl = "https://news.nate.com/recent?cate=soc&mid=n0401&type=c&date=20201120&page=1";
 
-        String daumOpiUrl = "https://news.daum.net/breakingnews/editorial?regDate=20201113&page=1";
+        String nateOpiUrl = "https://news.nate.com/recent?cate=col&mid=n0701&type=c&date=20201120&page=1";
+
         // 완료.
-        ajaxCrw(nateHomeUrl);
+        getDetailArticle(ajaxCrw(nateHomeUrl));
 
-        //polOrSocHomHeadline(daumOpiUrl);
+        //polOrSocHomHeadline(nateOpiUrl);
     }
 
 
     //  daum  home headline 뉴스.
-    public static void ajaxCrw(String url) throws InterruptedException {
-
+    public static List<String>  ajaxCrw(String url) throws InterruptedException {
+        List<String> result = new ArrayList<>();
         //		크롬 드라이버 설정.
         System.setProperty("webdriver.chrome.driver", chromeDriverPath);
         ChromeOptions options = new ChromeOptions();
@@ -60,38 +65,43 @@ public class Nate {
         WebDriver driver = new ChromeDriver(options);
         driver.navigate().to(url);
         try {
-            WebElement  prev = driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[2]"));
-            log.info("prev :: {}",prev.getAttribute("title"));
+
 
             WebElement tabCnt = driver.findElement(By.xpath("//*[@id='newsMoreArea']/em"));
             log.info("tabCnt :: {}", tabCnt.getText());
+
             if("2".equals(tabCnt.getText())){
                 driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[2]")).click();
+                Thread.sleep(1000);
             }else if("3".equals(tabCnt.getText())){
                 driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[2]")).click();
+                Thread.sleep(1000);
                 driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[2]")).click();
+                Thread.sleep(1000);
             }
 
             WebElement startCnt = driver.findElement(By.xpath("//*[@id='newsMoreArea']/em"));
             log.info("startCnt :: {}", startCnt.getText());
 
-//            List<WebElement> linkList = driver.findElements(By.xpath("//*[@class='tabCnt']/ul/li/a"));
-//            linkList.forEach(v -> log.info("tab1 :: {}",v.getAttribute("href")));
-//
-//            driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[3]")).click();
-//
-//            List<WebElement> linkList2 = driver.findElements(By.xpath("//*[@class='tabCnt']/ul/li/a"));
-//            linkList2.forEach(v -> log.info("tab2 :: {}" ,v.getAttribute("href")));
-//
-//            driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[3]")).click();
-//
-//            List<WebElement> linkList3 = driver.findElements(By.xpath("//*[@class='tabCnt']/ul/li/a"));
-//            linkList3.forEach(v -> log.info("tab3 :: {}" ,v.getAttribute("href")));
+            List<WebElement> linkList = driver.findElements(By.xpath("//*[@class='tabCnt']/ul/li/a"));
+            linkList.forEach(v -> result.add(v.getAttribute("href")));
 
+            driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[3]")).click();
+            Thread.sleep(1000);
+
+            List<WebElement> linkList2 = driver.findElements(By.xpath("//*[@class='tabCnt']/ul/li/a"));
+            linkList2.forEach(v -> result.add(v.getAttribute("href")));
+
+            driver.findElement(By.xpath("//*[@id='newsOptBtn']/button[3]")).click();
+            Thread.sleep(1000);
+
+            List<WebElement> linkList3 = driver.findElements(By.xpath("//*[@class='tabCnt']/ul/li/a"));
+            linkList3.forEach(v -> result.add(v.getAttribute("href")));
+            result.forEach(log::info);
+            return result;
         } finally {
             driver.quit();
         }
-
     }
 
     public static void  polOrSocHomHeadline(String url){
@@ -107,30 +117,16 @@ public class Nate {
         try {
 
             result = new ArrayList<String>();
-            //*[@id="mArticle"]/div[3]/ul/li/div/strong/a
-            List<WebElement> linkList = driver.findElements(By.xpath("//*[@id='mArticle']/div[3]/ul/li/div/strong/a"));
+
+            List<WebElement> linkList = driver.findElements(By.xpath("//*[@id='newsContents']/div[1]/div[2]/div/div/a"));
             for (WebElement v : linkList) {
                 result.add(v.getAttribute("href"));
             }
-
-
-//            //	다음 -> 정치 홈 -> 상단.
-//            List<WebElement> headLineImgLink = driver.findElements(By.xpath("//*[@id='cSub']/div/div[1]/div[1]/div/strong/a"));
-//            for (WebElement v : headLineImgLink) {
-//                result.add(v.getAttribute("href"));
-//            }
-//
-//            //	다음 -> 정치 홈 -> 중간 이미지 포함.
-//            List<WebElement> headLineNomalLink = driver.findElements(By.xpath("//*[@id='cSub']/div/div[1]/ul[1]/li/a"));
-//            for (WebElement v : headLineNomalLink) {
-//                result.add(v.getAttribute("href"));
-//            }
-//
-//            //	다음 -> 정치 홈 -> 중간 목록만.
-//            List<WebElement> politicImgLink = driver.findElements(By.xpath("//*[@id='cSub']/div/div[1]/ul[2]/li/strong/a"));
-//            for (WebElement v : politicImgLink) {
-//                result.add(v.getAttribute("href"));
-//            }
+            try {
+                getDetailArticle(result);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             result.forEach(log::info);
 
@@ -143,47 +139,48 @@ public class Nate {
         List<Contents2> result = new ArrayList<>();
         List<String> pks = new ArrayList<>();
         Document doc;
-
-
         for (String url : list) {
 
             doc = Jsoup.connect(url).get();
+            Element asd = doc.getElementById("realArtcContents");
+            String img1 = doc.getElementsByClass("sub_tit").stream().map(v -> v.text()).collect(Collectors.joining("|"));
+            String img2 = doc.getElementsByClass("news_cont_img_txt").stream().map(v -> v.text()).collect(Collectors.joining("|"));
+            if(asd != null){
+                DateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH);
 
-            DateFormat dateParser = new SimpleDateFormat("yyyyMMddHHmmss", Locale.ENGLISH);
+                String writeDtTag = doc.select("#articleView > p > span.firstDate > em").text();
+                LocalDateTime regDt ;
 
-            String writeDtTag = doc.getElementsByAttributeValue("property","og:regDate").attr("content");
-            LocalDateTime regDt ;
+                try {
+                    regDt = LocalDateTime.ofInstant(dateParser.parse(writeDtTag).toInstant(), ZoneId.of("Asia/Seoul"));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    regDt = LocalDateTime.now();
+                }
 
-            try {
-                regDt = LocalDateTime.ofInstant(dateParser.parse(writeDtTag).toInstant(), ZoneId.of("Asia/Seoul"));
-            } catch (ParseException e) {
-                e.printStackTrace();
-                regDt = LocalDateTime.now();
+                //  중복된 contents는 담지 않음.
+                Contents2 cont = Contents2.builder()
+                        .articleCategory(doc.select("#mediaSubnav > h3 > a").text())
+                        .articleContents(doc.getElementById("realArtcContents").text())
+                        .articleImgCaption(doc.getElementsByClass("news_cont_img_txt").stream().map(v -> v.text()).collect(Collectors.joining("|")))
+                        .articleMediaNm(doc.select("#articleView > p > span.link > a.medium").text())
+                        // 해당 제목과 url의 텍스트를 합쳐서 md5를 구하고 pk로 함.
+                        .articlePk("")
+                        .articleTitle(doc.getElementsByAttributeValue("property","og:title").attr("content"))
+                        .articleUrl(url)
+                        .articleWriteDt(regDt)
+                        .articleWriter(doc.select("#articleView > p > span.link > a.medium").text())
+                        .siteNm("NATE")
+                        .srcType("HOMEHEADLINE")
+                        .delYn("N")
+                        .articlePostStartDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                        .articleCrwDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                        .upDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+                        .build();
+
+                result.add(cont);
             }
-
-            //  중복된 contents는 담지 않음.
-            Contents2 cont = Contents2.builder()
-                    .articleCategory(doc.select("#kakaoBody").text())
-                    .articleContents(doc.getElementsByClass("article_view").text())
-                    .articleImgCaption(doc.getElementsByClass("txt_caption").stream().map(v -> v.text()).collect(Collectors.joining("|")))
-                    .articleMediaNm(doc.select("#cSub > div > em > a > img").attr("alt"))
-                    // 해당 제목과 url의 텍스트를 합쳐서 md5를 구하고 pk로 함.
-                    .articlePk("")
-                    .articleTitle(doc.getElementsByAttributeValue("property","og:title").attr("content"))
-                    .articleUrl(url)
-                    .articleWriteDt(regDt)
-                    .articleWriter(doc.select("#cSub > div > span > span:nth-child(1)").text())
-                    .siteNm("DAUM")
-                    .srcType("HOMEHEADLINE")
-                    .delYn("N")
-                    .articlePostStartDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                    .articleCrwDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                    .upDt(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-                    .build();
-
-            result.add(cont);
         }
-
         //  PK list
         result.forEach(v -> log.info(" get detail :: {}" ,v.toString()));
 
